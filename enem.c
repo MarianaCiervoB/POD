@@ -24,7 +24,7 @@ int compara_inscricao(const void *a, const void *b) {
 void processar_linha(char *linha) {
     char campo1[32], campo2[100], campo3[4], campo4[16];
 
-    if (sscanf(linha, "%31[^,],%99[^,],%3[^,],%15[^\n]", campo1, campo2, campo3, campo4) != 4) {
+    if (sscanf(linha, "%31[^;];%99[^;];%3[^;];%15[^\n]", campo1, campo2, campo3, campo4) != 4) {
         printf("Linha malformada: %s\n", linha);
         return;
     }
@@ -39,7 +39,6 @@ void processar_linha(char *linha) {
     inscricoes[total_inscricoes].uf[sizeof(inscricoes[0].uf) - 1] = '\0';
 
     campo4[strcspn(campo4, "\r")] = '\0';
-
     inscricoes[total_inscricoes].nota_redacao = atof(campo4);
 
     total_inscricoes++;
