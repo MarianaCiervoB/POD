@@ -22,24 +22,63 @@ int compara_inscricao(const void *a, const void *b) {
 }
 
 void processar_linha(char *linha) {
-    char campo1[32], campo2[100], campo3[4], campo4[16];
+    int coluna = 0;
+    char *inicio = linha;
+    char campo[256];
+    int i = 0;
 
-    if (sscanf(linha, "%31[^;];%99[^;];%3[^;];%15[^\n]", campo1, campo2, campo3, campo4) != 4) {
-        printf("Linha malformada: %s\n", linha);
+    char campo_inscricao[32] = "";
+    char campo_municipio[100] = "";
+    char campo_uf[4] = "";
+    char campo_redacao[16] = "";
+
+    while (*linha != '\0' && coluna <= 51) {
+        if (*linha == ';' || *(linha + 1) == '\0') {
+            int tamanho = linha - inicio;
+            if (*(linha + 1) == '\0') tamanho++; /* último campo */
+
+            if (tamanho >= sizeof(campo)) tamanho = sizeof(campo) - 1;
+
+            strncpy(campo, inicio, tamanho);
+            campo[tamanho] = '\0';
+
+            /* Armazena somente os campos desejados */
+            if (coluna == 0) {
+                strncpy(campo_inscricao, campo, sizeof(campo_inscricao) - 1);
+            } else if (coluna == 20) {
+                strncpy(campo_municipio, campo, sizeof(campo_municipio) - 1);
+            } else if (coluna == 22) {
+                strncpy(campo_uf, campo, sizeof(campo_uf) - 1);
+            } else if (coluna == 50) {
+                strncpy(campo_redacao, campo, sizeof(campo_redacao) - 1);
+            }
+
+            /* Próxima coluna */
+            coluna++;
+            linha++;  /* pula o ';' */
+            inicio = linha;
+        } else {
+            linha++;
+        }
+    }
+
+    if (coluna < 51) {
+        printf("Linha malformada (colunas insuficientes): %s\n", linha);
         return;
     }
 
-    strncpy(inscricoes[total_inscricoes].inscricao, campo1, sizeof(inscricoes[0].inscricao) - 1);
+    /* Preenche a struct */
+    strncpy(inscricoes[total_inscricoes].inscricao, campo_inscricao, sizeof(inscricoes[0].inscricao) - 1);
     inscricoes[total_inscricoes].inscricao[sizeof(inscricoes[0].inscricao) - 1] = '\0';
 
-    strncpy(inscricoes[total_inscricoes].municipio, campo2, sizeof(inscricoes[0].municipio) - 1);
+    strncpy(inscricoes[total_inscricoes].municipio, campo_municipio, sizeof(inscricoes[0].municipio) - 1);
     inscricoes[total_inscricoes].municipio[sizeof(inscricoes[0].municipio) - 1] = '\0';
 
-    strncpy(inscricoes[total_inscricoes].uf, campo3, sizeof(inscricoes[0].uf) - 1);
+    strncpy(inscricoes[total_inscricoes].uf, campo_uf, sizeof(inscricoes[0].uf) - 1);
     inscricoes[total_inscricoes].uf[sizeof(inscricoes[0].uf) - 1] = '\0';
 
-    campo4[strcspn(campo4, "\r")] = '\0';
-    inscricoes[total_inscricoes].nota_redacao = atof(campo4);
+    campo_redacao[strcspn(campo_redacao, "\r\n")] = '\0'; /* limpar quebra de linha */
+    inscricoes[total_inscricoes].nota_redacao = atof(campo_redacao);
 
     total_inscricoes++;
 }
