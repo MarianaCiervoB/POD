@@ -4,8 +4,7 @@
 #include <string.h>
 
 #define MAX_LINE 1024
-#define MAX_ENTRIES 1000000
-
+#define MAX_ENTRIES 4000000 /* Para cobrir todos os inscritos */
 typedef struct {
     char inscricao[32];
     char municipio[100];
@@ -84,7 +83,7 @@ void processar_linha(char *linha) {
 }
 
 void carregar_dados(const char *arquivo) {
-    FILE *fp = fopen(arquivo, "r");
+    FILE *fp = fopen(arquivo, "rb");
     char linha[MAX_LINE];
 
     if (!fp) {
